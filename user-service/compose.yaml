@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=ecommerce_user'
+      - 'POSTGRES_PASSWORD=userAdmin1234'
+      - 'POSTGRES_USER=admin'
+    ports:
+      - '5433:5432'

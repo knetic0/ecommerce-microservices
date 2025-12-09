@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package user;
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "com.mehmetsolak.proto.user";
+option java_outer_classname = "UserProto";
+
+enum Role {
+  USER = 0;
+  ADMIN = 1;
+  SUPER_ADMIN = 2;
+}
+
+enum Gender {
+  MALE = 0;
+  FEMALE = 1;
+  OTHER = 2;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string phoneNumber = 3;
+  string firstName = 4;
+  string lastName = 5;
+  Role role = 6;
+  Gender gender = 7;
+  google.protobuf.Timestamp createdAt = 8;
+  google.protobuf.Timestamp updatedAt = 9;
+}
+
+message FindUserByEmailRequest {
+  string email = 1;
+}
+
+message UserCreateRequest {
+  string email = 1;
+  string phoneNumber = 2;
+  string firstName = 3;
+  string lastName = 4;
+  string password = 5;
+  Role role = 6;
+  Gender gender = 7;
+}
+
+message UserResponse {
+  bool isSuccess = 1;
+  User user = 2;
+  string errorMessage = 3;
+}
+
+message AuthenticateUserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message AuthenticateUserResponse {
+  bool isValid = 1;
+  User user = 2;
+  string errorMessage = 3;
+}
+
+message UserCreateResponse {
+  bool isSuccess = 1;
+  User user = 2;
+  string errorMessage = 3;
+}
+
+service UserService {
+  rpc FindUserByEmail(FindUserByEmailRequest) returns (UserResponse);
+  rpc CreateUser(UserCreateRequest) returns (UserCreateResponse);
+  rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticateUserResponse);
+}
