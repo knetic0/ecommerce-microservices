@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package auth;
+
+option java_multiple_files = true;
+option java_package = "com.mehmetsolak.proto.auth";
+option java_outer_classname = "AuthProto";
+
+message IntrospectTokenRequest {
+  string token = 1;
+}
+
+message IntrospectTokenResponse {
+  bool active = 1;
+  string userId = 2;
+  string role = 3;
+}
+
+service AuthService {
+  rpc IntrospectToken(IntrospectTokenRequest) returns (IntrospectTokenResponse);
+}
