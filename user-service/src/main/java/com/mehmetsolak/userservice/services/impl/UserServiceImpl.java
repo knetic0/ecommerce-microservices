@@ -41,19 +41,21 @@ public final class UserServiceImpl implements UserService {
 
     @Override
     public Result<UserResponseDto> authenticate(UserLoginRequestDto request) {
-        User user = getByEmail(request.getEmail());
-        if(user == null) {
-            return Result.failure("User not found");
+        Result<User> userResult = getByEmail(request.getEmail());
+        if(!userResult.isSuccess()) {
+            return Result.failure(userResult.getMessage());
         }
+        User user = userResult.getData();
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             return Result.failure("Incorrect password");
         }
         return Result.success(UserResponseDto.from(user));
     }
 
-    private User getByEmail(String email) {
+    private Result<User> getByEmail(String email) {
         return userRepository
                 .findByEmail(email)
-                .orElse(null);
+                .map(Result::success)
+                .orElse(Result.failure("User not found"));
     }
 }

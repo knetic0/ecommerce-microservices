@@ -1,8 +1,8 @@
 package com.mehmetsolak.userservice.dtos;
 
+import com.mehmetsolak.enums.UserGender;
+import com.mehmetsolak.enums.UserRole;
 import com.mehmetsolak.userservice.entities.User;
-import com.mehmetsolak.userservice.entities.enums.UserGender;
-import com.mehmetsolak.userservice.entities.enums.UserRole;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;

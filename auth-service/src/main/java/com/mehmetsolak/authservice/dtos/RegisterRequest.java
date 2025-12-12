@@ -1,7 +1,7 @@
 package com.mehmetsolak.authservice.dtos;
 
-import com.mehmetsolak.authservice.enums.UserGender;
-import com.mehmetsolak.authservice.enums.UserRole;
+import com.mehmetsolak.enums.UserGender;
+import com.mehmetsolak.enums.UserRole;
 import lombok.Data;
 
 @Data

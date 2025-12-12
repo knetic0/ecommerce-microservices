@@ -1,7 +1,7 @@
 package com.mehmetsolak.userservice.entities;
 
-import com.mehmetsolak.userservice.entities.enums.UserGender;
-import com.mehmetsolak.userservice.entities.enums.UserRole;
+import com.mehmetsolak.enums.UserGender;
+import com.mehmetsolak.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,12 +1,12 @@
 package com.mehmetsolak.userservice.grpc;
 
+import com.mehmetsolak.enums.UserGender;
+import com.mehmetsolak.enums.UserRole;
 import com.mehmetsolak.proto.user.*;
 import com.mehmetsolak.results.Result;
 import com.mehmetsolak.userservice.dtos.UserCreateRequestDto;
 import com.mehmetsolak.userservice.dtos.UserLoginRequestDto;
 import com.mehmetsolak.userservice.dtos.UserResponseDto;
-import com.mehmetsolak.userservice.entities.enums.UserGender;
-import com.mehmetsolak.userservice.entities.enums.UserRole;
 import com.mehmetsolak.userservice.grpc.utilities.UserMapper;
 import com.mehmetsolak.userservice.services.UserService;
 import io.grpc.stub.StreamObserver;
