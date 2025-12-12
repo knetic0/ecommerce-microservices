@@ -21,6 +21,7 @@
         <module>user-service</module>
         <module>auth-service</module>
         <module>eureka-server</module>
+        <module>api-gateway</module>
         <module>common</module>
     </modules>
 </project>
