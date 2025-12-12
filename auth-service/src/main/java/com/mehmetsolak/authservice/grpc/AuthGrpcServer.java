@@ -26,49 +26,59 @@ public final class AuthGrpcServer extends AuthServiceGrpc.AuthServiceImplBase {
             IntrospectTokenRequest request,
             StreamObserver<IntrospectTokenResponse> responseObserver
     ) {
-        String token = request.getToken();
-        String username = jwtService.extractUsername(token);
+        try {
+            String token = request.getToken();
+            String username = jwtService.extractUsername(token);
 
-        FindUserByEmailRequest grpcRequest = FindUserByEmailRequest
-                .newBuilder()
-                .setEmail(username)
-                .build();
+            FindUserByEmailRequest grpcRequest = FindUserByEmailRequest
+                    .newBuilder()
+                    .setEmail(username)
+                    .build();
 
-        UserResponse response = userServiceStub.findUserByEmail(grpcRequest);
-        if(!response.getIsSuccess()) {
+            UserResponse response = userServiceStub.findUserByEmail(grpcRequest);
+            if (!response.getIsSuccess()) {
+                IntrospectTokenResponse resp = IntrospectTokenResponse
+                        .newBuilder()
+                        .setActive(false)
+                        .build();
+
+                responseObserver.onNext(resp);
+                responseObserver.onCompleted();
+                return;
+            }
+
+            User user = response.getUser();
+            CustomUserDetails userDetails = Mapper.toCustomUserDetails(user);
+
+            boolean isTokenValid = jwtService.validateToken(token, userDetails);
+            if (!isTokenValid) {
+                IntrospectTokenResponse resp = IntrospectTokenResponse
+                        .newBuilder()
+                        .setActive(false)
+                        .build();
+
+                responseObserver.onNext(resp);
+                responseObserver.onCompleted();
+                return;
+            }
+
             IntrospectTokenResponse resp = IntrospectTokenResponse
                     .newBuilder()
-                    .setActive(false)
+                    .setActive(true)
+                    .setUserId(userDetails.getId())
+                    .setRole(userDetails.getRole())
                     .build();
 
             responseObserver.onNext(resp);
             responseObserver.onCompleted();
-            return;
         }
-
-        User user = response.getUser();
-        CustomUserDetails userDetails = Mapper.toCustomUserDetails(user);
-
-        boolean isTokenValid = jwtService.validateToken(token, userDetails);
-        if(!isTokenValid) {
+        catch (Exception e) {
             IntrospectTokenResponse resp = IntrospectTokenResponse
                     .newBuilder()
                     .setActive(false)
                     .build();
-
             responseObserver.onNext(resp);
             responseObserver.onCompleted();
-            return;
         }
-
-        IntrospectTokenResponse resp = IntrospectTokenResponse
-                .newBuilder()
-                .setActive(true)
-                .setUserId(userDetails.getId())
-                .setRole(userDetails.getRole())
-                .build();
-
-        responseObserver.onNext(resp);
-        responseObserver.onCompleted();
     }
 }
