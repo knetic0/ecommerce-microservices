@@ -1,5 +1,6 @@
 package com.mehmetsolak.apigateway.filters;
 
+import com.mehmetsolak.constants.CustomHeaders;
 import com.mehmetsolak.proto.auth.AuthServiceGrpc;
 import com.mehmetsolak.proto.auth.IntrospectTokenRequest;
 import org.jspecify.annotations.NullMarked;
@@ -47,7 +48,13 @@ public final class AuthFilter extends AbstractGatewayFilterFactory<Object> {
                         if(!response.getActive()) {
                             return unauthorized(exchange);
                         }
-                        return chain.filter(exchange);
+                        return chain.filter(
+                                exchange.mutate()
+                                        .request(builder -> builder
+                                                .header(CustomHeaders.USER_ID, response.getUserId())
+                                        )
+                                        .build()
+                                );
                     });
         };
     }

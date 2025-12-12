@@ -63,7 +63,7 @@ public final class AuthGrpcServer extends AuthServiceGrpc.AuthServiceImplBase {
 
         IntrospectTokenResponse resp = IntrospectTokenResponse
                 .newBuilder()
-                .setActive(false)
+                .setActive(true)
                 .setUserId(userDetails.getId())
                 .setRole(userDetails.getRole())
                 .build();

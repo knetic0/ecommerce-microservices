@@ -11,13 +11,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public final class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    
+
+    @Override
+    public Result<UserResponseDto> findById(String id) {
+        return userRepository
+                .findById(UUID.fromString(id))
+                .map(user -> Result.success(UserResponseDto.from(user)))
+                .orElse(Result.failure("User not found"));
+    }
+
     @Override
     public Result<UserResponseDto> findByEmail(String email) {
         return userRepository
