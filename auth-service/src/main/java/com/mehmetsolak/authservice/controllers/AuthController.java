@@ -5,6 +5,7 @@ import com.mehmetsolak.authservice.dtos.LoginResponse;
 import com.mehmetsolak.authservice.dtos.RegisterRequest;
 import com.mehmetsolak.authservice.security.CustomUserDetails;
 import com.mehmetsolak.authservice.services.JwtService;
+import com.mehmetsolak.authservice.services.WelcomeEmailProducer;
 import com.mehmetsolak.proto.user.*;
 import com.mehmetsolak.results.Result;
 import jakarta.validation.Valid;
@@ -24,6 +25,7 @@ public final class AuthController {
 
     private final JwtService jwtService;
     private final UserServiceGrpc.UserServiceBlockingStub userServiceStub;
+    private final WelcomeEmailProducer welcomeEmailProducer;
 
     @PostMapping("/login")
     public ResponseEntity<Result<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
@@ -41,7 +43,7 @@ public final class AuthController {
         }
 
         CustomUserDetails userDetails = new CustomUserDetails(grpcResponse.getUser());
-        String token = jwtService.generateToken(userDetails, Map.of());
+        String token = jwtService.generateToken(userDetails, Map.of("role", userDetails.getRole()));
 
         return ResponseEntity.ok(
                 Result.success(LoginResponse
@@ -71,6 +73,9 @@ public final class AuthController {
                     .badRequest()
                     .body(Result.failure(response.getErrorMessage()));
         }
+
+        User user = response.getUser();
+        welcomeEmailProducer.send(user.getEmail(), user.getFirstName() + " " + user.getLastName());
 
         return ResponseEntity.ok(Result.success("Kullanıcı başarıyla kaydedildi!"));
     }
