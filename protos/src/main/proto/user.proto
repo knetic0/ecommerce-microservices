@@ -36,6 +36,10 @@ message FindUserByEmailRequest {
   string email = 1;
 }
 
+message FindUserByIdRequest {
+  string id = 1;
+}
+
 message UserCreateRequest {
   string email = 1;
   string phoneNumber = 2;
@@ -71,6 +75,7 @@ message UserCreateResponse {
 
 service UserService {
   rpc FindUserByEmail(FindUserByEmailRequest) returns (UserResponse);
+  rpc FindUserById(FindUserByIdRequest) returns (UserResponse);
   rpc CreateUser(UserCreateRequest) returns (UserCreateResponse);
   rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticateUserResponse);
 }

@@ -92,6 +92,38 @@ public final class UserGrpcServer extends UserServiceGrpc.UserServiceImplBase {
     }
 
     @Override
+    public void findUserById(
+            FindUserByIdRequest request,
+            StreamObserver<UserResponse> responseObserver
+    ) {
+        Result<UserResponseDto> result = userService.findById(request.getId());
+
+        if (!result.isSuccess()) {
+            UserResponse response = UserResponse
+                    .newBuilder()
+                    .setIsSuccess(false)
+                    .setErrorMessage("User not found.")
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        User grpcUser = UserMapper.toGrpcUser(result.getData());
+
+        UserResponse response = UserResponse
+                .newBuilder()
+                .setUser(grpcUser)
+                .setIsSuccess(true)
+                .setErrorMessage("")
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
     public void authenticateUser(
             AuthenticateUserRequest request,
             StreamObserver<AuthenticateUserResponse> responseObserver) {

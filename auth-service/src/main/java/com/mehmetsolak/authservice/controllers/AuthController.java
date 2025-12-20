@@ -1,20 +1,20 @@
 package com.mehmetsolak.authservice.controllers;
 
-import com.mehmetsolak.authservice.dtos.LoginRequest;
-import com.mehmetsolak.authservice.dtos.LoginResponse;
-import com.mehmetsolak.authservice.dtos.RegisterRequest;
+import com.mehmetsolak.authservice.dtos.*;
 import com.mehmetsolak.authservice.security.CustomUserDetails;
+import com.mehmetsolak.authservice.security.RefreshTokenCookieFactory;
 import com.mehmetsolak.authservice.services.JwtService;
+import com.mehmetsolak.authservice.services.RefreshTokenService;
 import com.mehmetsolak.authservice.services.WelcomeEmailProducer;
 import com.mehmetsolak.proto.user.*;
 import com.mehmetsolak.results.Result;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -24,11 +24,16 @@ import java.util.Map;
 public final class AuthController {
 
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenCookieFactory refreshTokenCookieFactory;
     private final UserServiceGrpc.UserServiceBlockingStub userServiceStub;
     private final WelcomeEmailProducer welcomeEmailProducer;
 
     @PostMapping("/login")
-    public ResponseEntity<Result<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<Result<LoginResponse>> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletResponse response
+    ) {
         AuthenticateUserRequest grpcRequest = AuthenticateUserRequest
                 .newBuilder()
                 .setEmail(request.getUsername())
@@ -44,6 +49,11 @@ public final class AuthController {
 
         CustomUserDetails userDetails = new CustomUserDetails(grpcResponse.getUser());
         String token = jwtService.generateToken(userDetails, Map.of("role", userDetails.getRole()));
+
+        String refreshToken = refreshTokenService.create(userDetails.getId());
+
+        ResponseCookie refreshCookie = refreshTokenCookieFactory.create(refreshToken);
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
         return ResponseEntity.ok(
                 Result.success(LoginResponse
@@ -78,5 +88,64 @@ public final class AuthController {
         welcomeEmailProducer.send(user.getEmail(), user.getFirstName() + " " + user.getLastName());
 
         return ResponseEntity.ok(Result.success("Kullanıcı başarıyla kaydedildi!"));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<Result<RefreshTokenResponse>> refreshToken(
+            @CookieValue(name = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response
+    ) {
+        if (refreshToken == null) {
+            return ResponseEntity.status(401)
+                    .body(Result.failure("Refresh token is null"));
+        }
+
+        Result<RefreshTokenRotationResult> rotationResult = refreshTokenService.rotate(refreshToken);
+        if (!rotationResult.isSuccess()) {
+            return ResponseEntity.status(401)
+                    .body(Result.failure(rotationResult.getMessage()));
+        }
+        RefreshTokenRotationResult rotatedRefreshToken = rotationResult.getData();
+
+        FindUserByIdRequest request = FindUserByIdRequest
+                .newBuilder()
+                .setId(String.valueOf(rotatedRefreshToken.getUserId()))
+                .build();
+
+        UserResponse userResponse = userServiceStub.findUserById(request);
+        if (!userResponse.getIsSuccess()) {
+            return ResponseEntity.status(401)
+                    .body(Result.failure(userResponse.getErrorMessage()));
+        }
+
+        CustomUserDetails userDetails = new CustomUserDetails(userResponse.getUser());
+        String accessToken = jwtService.generateToken(userDetails, Map.of("role", userDetails.getRole()));
+
+        ResponseCookie refreshCookie = refreshTokenCookieFactory.create(rotatedRefreshToken.getRawRefreshToken());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+        return ResponseEntity.ok(Result.success(
+                RefreshTokenResponse.builder()
+                        .token(accessToken)
+                        .build()
+                )
+        );
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @CookieValue(name = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response
+    ) {
+        if (refreshToken != null) {
+            refreshTokenService.revoke(refreshToken);
+        }
+
+        response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                refreshTokenCookieFactory.delete().toString()
+        );
+
+        return ResponseEntity.noContent().build();
     }
 }
