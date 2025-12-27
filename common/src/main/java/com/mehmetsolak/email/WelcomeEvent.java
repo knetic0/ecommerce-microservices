@@ -1,12 +1,13 @@
 package com.mehmetsolak.email;
 
-public final class WelcomeEvent {
+public final class WelcomeEvent extends BaseEvent {
     private String to;
     private String fullName;
 
-    public WelcomeEvent() { }
+    public WelcomeEvent() { super(); }
 
     public WelcomeEvent(String to, String fullName) {
+        super();
         this.to = to;
         this.fullName = fullName;
     }
