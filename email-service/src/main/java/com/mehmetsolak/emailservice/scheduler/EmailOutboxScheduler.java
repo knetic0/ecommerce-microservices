@@ -1,10 +1,9 @@
 package com.mehmetsolak.emailservice.scheduler;
 
-import com.mehmetsolak.email.WelcomeEvent;
+import com.mehmetsolak.emailservice.application.EmailHandler;
 import com.mehmetsolak.emailservice.entity.EmailOutbox;
 import com.mehmetsolak.emailservice.enums.EmailStatus;
-import com.mehmetsolak.emailservice.infrastructure.EmailService;
-import com.mehmetsolak.emailservice.infrastructure.ObjectMapperService;
+import com.mehmetsolak.emailservice.registry.EmailHandlerRegistry;
 import com.mehmetsolak.emailservice.repository.EmailOutboxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +20,7 @@ import java.util.List;
 public class EmailOutboxScheduler {
 
     private final EmailOutboxRepository emailOutboxRepository;
-    private final EmailService emailService;
-    private final ObjectMapperService objectMapperService;
+    private final EmailHandlerRegistry emailHandlerRegistry;
 
     @Value("${email-service.outbox.max-retry}")
     private Integer maxRetryCount;
@@ -56,20 +54,15 @@ public class EmailOutboxScheduler {
                 outbox.getEventId(), outbox.getType(), outbox.getRetryCount());
 
         try {
-            switch (outbox.getType()) {
-                case WELCOME_EMAIL -> {
-                    WelcomeEvent event = objectMapperService.deserialize(
-                            outbox.getPayload(), WelcomeEvent.class);
-
-                    emailService.sendWelcome(event);
-                }
-                default -> {
-                    log.warn("Unknown email type {}", outbox.getType());
-                    return;
-                }
+            EmailHandler handler = emailHandlerRegistry.getHandler(outbox.getType());
+            if (handler == null) {
+                log.warn("No handler found for email type {}", outbox.getType());
+                return;
             }
 
+            handler.handle(outbox.getPayload());
             outbox.setStatus(EmailStatus.SENT);
+
             log.info("Email sent successfully - eventId {}", outbox.getEventId());
         } catch (Exception e) {
             outbox.setRetryCount(outbox.getRetryCount() + 1);
