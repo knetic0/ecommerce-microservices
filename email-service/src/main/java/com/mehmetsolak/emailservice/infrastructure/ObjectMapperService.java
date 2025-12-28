@@ -1,8 +1,9 @@
 package com.mehmetsolak.emailservice.infrastructure;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public interface ObjectMapperService {
-    <T> String serialize(T object) throws JsonProcessingException;
-    <T> T deserialize(String json, Class<T> clazz) throws JsonProcessingException;
+    <T> T fromJsonNode(JsonNode json, Class<T> clazz) throws JsonProcessingException;
+    <T> JsonNode toJsonNode(T object) throws JsonProcessingException;
 }

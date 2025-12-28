@@ -1,5 +1,6 @@
 package com.mehmetsolak.emailservice.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mehmetsolak.emailservice.enums.EmailStatus;
 import com.mehmetsolak.emailservice.enums.EmailType;
 import jakarta.persistence.*;
@@ -8,7 +9,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -32,8 +35,9 @@ public final class EmailOutbox {
 
     private UUID eventId;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String payload;
+    private JsonNode payload;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

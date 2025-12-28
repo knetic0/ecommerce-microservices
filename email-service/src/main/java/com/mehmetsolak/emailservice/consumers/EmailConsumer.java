@@ -19,7 +19,6 @@ public final class EmailConsumer {
             groupId = "email-service"
     )
     @RetryableTopic(
-            attempts = "5",
             backOff = @BackOff(
                     delay = 2000,
                     multiplier = 2

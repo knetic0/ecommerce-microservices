@@ -1,5 +1,6 @@
 package com.mehmetsolak.results;
 
+import java.util.List;
 import java.util.Map;
 
 public final class Result<T> {
@@ -8,7 +9,7 @@ public final class Result<T> {
     private String message;
     private T data;
 
-    private Map<String, String> validationErrors;
+    private List<ValidationError> validationErrors;
 
     public boolean isSuccess() {
         return isSuccess;
@@ -22,7 +23,7 @@ public final class Result<T> {
         return data;
     }
 
-    public Map<String, String> getValidationErrors() {
+    public List<ValidationError> getValidationErrors() {
         return validationErrors;
     }
 
@@ -42,12 +43,12 @@ public final class Result<T> {
         this.data = data;
     }
 
-    private Result(boolean isSuccess, Map<String, String> validationErrors) {
+    private Result(boolean isSuccess, List<ValidationError> validationErrors) {
         this.isSuccess = isSuccess;
         this.validationErrors = validationErrors;
     }
 
-    private Result(boolean isSuccess, String message, Map<String, String> validationErrors) {
+    private Result(boolean isSuccess, String message, List<ValidationError> validationErrors) {
         this.isSuccess = isSuccess;
         this.message = message;
         this.validationErrors = validationErrors;
@@ -83,11 +84,11 @@ public final class Result<T> {
         return new Result<>(false, message);
     }
 
-    public static <T> Result<T> failure(Map<String, String> validationErrors) {
+    public static <T> Result<T> failure(List<ValidationError> validationErrors) {
         return new Result<>(false, validationErrors);
     }
 
-    public static <T> Result<T> failure(String message, Map<String, String> validationErrors) {
+    public static <T> Result<T> failure(String message, List<ValidationError> validationErrors) {
         return new Result<>(false, message, validationErrors);
     }
 }

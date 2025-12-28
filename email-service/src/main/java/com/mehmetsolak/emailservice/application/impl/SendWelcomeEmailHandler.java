@@ -1,6 +1,7 @@
 package com.mehmetsolak.emailservice.application.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mehmetsolak.email.WelcomeEvent;
 import com.mehmetsolak.emailservice.application.EmailHandler;
 import com.mehmetsolak.emailservice.enums.EmailType;
@@ -22,8 +23,8 @@ public final class SendWelcomeEmailHandler implements EmailHandler {
     }
 
     @Override
-    public void handle(String payload) throws JsonProcessingException {
-        WelcomeEvent event = objectMapperService.deserialize(payload, WelcomeEvent.class);
+    public void handle(JsonNode payload) throws JsonProcessingException {
+        WelcomeEvent event = objectMapperService.fromJsonNode(payload, WelcomeEvent.class);
         emailService.sendWelcome(event);
     }
 }

@@ -38,7 +38,7 @@ public final class EmailDlqServiceImpl implements EmailDlqService {
         try {
             EmailOutbox emailOutbox = EmailOutbox.builder()
                     .eventId(event.getEventId())
-                    .payload(objectMapperService.serialize(event))
+                    .payload(objectMapperService.toJsonNode(event))
                     .status(EmailStatus.FAILED)
                     .type(emailType)
                     .retryCount(0)
