@@ -5,6 +5,8 @@ import com.mehmetsolak.proto.user.Role;
 import com.mehmetsolak.proto.user.User;
 import com.mehmetsolak.userservice.dtos.UserResponseDto;
 
+import java.util.Objects;
+
 public final class UserMapper {
 
     public static User toGrpcUser(UserResponseDto user) {
@@ -17,6 +19,7 @@ public final class UserMapper {
                 .setLastName(user.getLastName())
                 .setRole(Role.valueOf(user.getRole().name()))
                 .setGender(Gender.valueOf(user.getGender().name()))
+                .setProfileImageUrl(Objects.requireNonNullElse(user.getProfileImageUrl(), ""))
                 .setCreatedAt(TimestampUtility.toGrpcTimestamp(user.getCreatedAt()))
                 .setUpdatedAt(TimestampUtility.toGrpcTimestamp(user.getUpdatedAt()))
                 .build();

@@ -62,9 +62,28 @@ public final class UserServiceImpl implements UserService {
         return Result.success(UserResponseDto.from(user));
     }
 
+    @Override
+    public Result<?> updateProfileImage(String id, String url) {
+        Result<User> userResult = getById(id);
+        if(!userResult.isSuccess()) {
+            return Result.failure(userResult.getMessage());
+        }
+        User user = userResult.getData();
+        user.setProfileImageUrl(url);
+        userRepository.save(user);
+        return Result.success();
+    }
+
     private Result<User> getByEmail(String email) {
         return userRepository
                 .findByEmail(email)
+                .map(Result::success)
+                .orElse(Result.failure("User not found"));
+    }
+
+    private Result<User> getById(String id) {
+        return userRepository
+                .findById(UUID.fromString(id))
                 .map(Result::success)
                 .orElse(Result.failure("User not found"));
     }

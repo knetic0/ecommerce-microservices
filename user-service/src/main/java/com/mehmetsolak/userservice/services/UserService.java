@@ -10,4 +10,5 @@ public interface UserService {
     Result<UserResponseDto> findByEmail(String email);
     Result<UserResponseDto> create(UserCreateRequestDto request);
     Result<UserResponseDto> authenticate(UserLoginRequestDto request);
+    Result<?> updateProfileImage(String id, String url);
 }

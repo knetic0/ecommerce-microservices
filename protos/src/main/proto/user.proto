@@ -26,10 +26,11 @@ message User {
   string phoneNumber = 3;
   string firstName = 4;
   string lastName = 5;
-  Role role = 6;
-  Gender gender = 7;
-  google.protobuf.Timestamp createdAt = 8;
-  google.protobuf.Timestamp updatedAt = 9;
+  string profileImageUrl = 6;
+  Role role = 7;
+  Gender gender = 8;
+  google.protobuf.Timestamp createdAt = 9;
+  google.protobuf.Timestamp updatedAt = 10;
 }
 
 message FindUserByEmailRequest {

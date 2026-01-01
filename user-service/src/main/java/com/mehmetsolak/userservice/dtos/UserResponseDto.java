@@ -30,6 +30,7 @@ public class UserResponseDto {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .profileImageUrl(user.getProfileImageUrl())
                 .role(user.getRole())
                 .gender(user.getGender())
                 .createdAt(user.getCreatedAt())
